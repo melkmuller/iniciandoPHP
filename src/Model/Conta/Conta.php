@@ -1,48 +1,45 @@
 <?php
 
+namespace Alura\Banco\Model\Conta;
+
+use Alura\Banco\Model\Pessoa;
+use Alura\Banco\Model\Cpf;
+use Alura\Banco\Model\Endereco;
+
 class Conta
 {
-    private $titular;
-    private $saldo = 0;
-    private static $numeroDeContas = 0;
+    private string $titular;
+    protected float $saldo = 0;
+    private static int $numeroDeContas = 0;
 
     public function __construct(Titular $titular)
     {
         $this->titular = $titular;
-        $this->saldo =0;
-
+        $this->saldo = 0;
         self::$numeroDeContas++;
     }
 
-    public function saca(float $valorASacar) : void
+    public function saca(float $valorASacar): void
     {
-
-        if ($valorASacar > $this->$saldo) {
+        $tarifaSaque = $valorASacar * $this->percentualTarifa();
+        $valorSaque = $valorASacar + $tarifaSaque;
+        if ($valorSaque > $this->saldo) {
             echo "Saldo indisponível";
             return;
         }
-        $this->saldo -= $valorASacar;
+        $this->saldo -= $valorSaque;
 
     }
 
-    public function deposita(float $valorADepositar) : void
+    abstract public function percentualTarifa(): float;
+
+    public function deposita(float $valorADepositar): void
     {
-        if ($valorADepositar < 0 ) {
+        if ($valorADepositar < 0) {
             echo "Valor precisa ser positivo";
             return;
         }
         $this->saldo += $valorADepositar;
-
-    }
-
-    public function transfere(float $valorATransferir, Conta $contaDestino): void
-    {
-        if ($valorATransferir > $this->saldo) {
-            echo "Saldo indisponível";
-            return;
-        }
-        $this->saca($valorATransferir);
-        $contaDestino->deposita($valorATransferir);
 
     }
 
@@ -60,9 +57,10 @@ class Conta
     {
         return $this->titular->recuperaCpf();
     }
-    
+
     public static function recuperaNumeroContas(): int
     {
         return self::$numeroDeContas;
     }
+
 }
